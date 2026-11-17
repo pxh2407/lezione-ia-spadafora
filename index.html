@@ -128,6 +128,19 @@
   .contatore{font-size:clamp(1rem,2vw,1.4rem);white-space:nowrap;}
   .titolo-mini{font-size:clamp(.85rem,1.7vw,1.15rem);opacity:.85;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   @media(max-width:700px){.titolo-mini{display:none;}}
+  /* cellulare: barra compatta (solo simboli) e logo d'angolo più piccolo */
+  @media(max-width:560px){
+    .barra{padding:0 8px;gap:6px;}
+    .barra .parola{display:none;}
+    .barra button{font-size:1.25rem;padding:.35em .7em;}
+    .barra #prev,.barra #next{padding:.35em .9em;}
+    .barra #menu-btn{font-size:1.05rem;}
+    .contatore{font-size:1rem;}
+    #scelta-ia{right:8px;}
+    .slide{padding:4vh 5vw 13vh 5vw;}
+    .logo-angolo{width:56px;top:10px;right:10px;}
+    h2{padding-right:62px;}
+  }
 
   /* ===== RACCOLTA e TRACCIA ===== */
   .pagina{position:fixed;inset:0;background:#fff;display:none;flex-direction:column;padding:3vh 6vw 12vh 6vw;overflow-y:auto;}
@@ -571,19 +584,19 @@
   </section>
 
   <div class="barra">
-    <button id="prev">&#9664; Indietro</button>
+    <button id="prev">&#9664;<span class="parola"> Indietro</span></button>
     <button id="menu-btn" class="oro">Menu</button>
     <div class="titolo-mini" id="titolo-mini"></div>
     <span class="contatore"><span id="num">1</span> / <span id="tot">1</span></span>
-    <button id="traccia-btn" title="Apre la traccia del docente alla slide attuale">&#128196; Traccia</button>
+    <button id="traccia-btn" title="Apre la traccia del docente alla slide attuale">&#128196;<span class="parola"> Traccia</span></button>
     <div id="scelta-ia">
       <div class="tit-scelta">Quale IA apro?</div>
       <button data-url="https://chatgpt.com">ChatGPT</button>
       <button data-url="https://copilot.microsoft.com">Copilot</button>
       <button data-url="https://gemini.google.com">Gemini</button>
     </div>
-    <button id="ia-btn" title="Apre l'IA in una nuova scheda di Chrome">&#129302; Apri l'IA</button>
-    <button id="next">Avanti &#9654;</button>
+    <button id="ia-btn" title="Apre l'IA in una nuova scheda di Chrome">&#129302;<span class="parola"> Apri l'IA</span></button>
+    <button id="next"><span class="parola">Avanti </span>&#9654;</button>
   </div>
 </div>
 
@@ -736,6 +749,18 @@
     if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
     else document.exitFullscreen();
   }
+  // cellulare: scorrere col dito a sinistra/destra cambia slide
+  let tx=null,ty=0;
+  player.addEventListener('touchstart',function(e){
+    if(e.target.closest('.barra,#scelta-ia')){tx=null;return;}
+    tx=e.touches[0].clientX;ty=e.touches[0].clientY;
+  },{passive:true});
+  player.addEventListener('touchend',function(e){
+    if(tx===null) return;
+    const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
+    tx=null;
+    if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5) mostra(dx<0?i+1:i-1);
+  },{passive:true});
   document.addEventListener('keydown',function(e){
     if(e.key==='f'||e.key==='F'){schermoIntero();return;}
     if(!player.classList.contains('attivo')) return;
